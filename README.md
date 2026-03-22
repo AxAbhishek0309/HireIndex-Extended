@@ -1,166 +1,177 @@
-# CareerBoostConnect
+# HireIndex
 
-A resume analysis application that checks your resume against ATS (Applicant Tracking System) requirements using AI-powered analysis.
+HireIndex is an AI-powered recruitment platform that automates resume screening with a focus on fairness, transparency, and efficiency. It provides ATS compatibility scoring, detailed feedback, and improvement suggestions to help job seekers optimize their resumes.
+
+Published at the **2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE**.
+
+## Features
+
+- **ATS Resume Scoring** — Analyzes resumes across keywords, experience, skills, education, and formatting
+- **AI-Powered Feedback** — Detailed section-by-section feedback with actionable improvement suggestions
+- **Analysis History** — Authenticated users can view and download past analysis reports
+- **User Authentication** — Email-based sign up/sign in with per-user data isolation
+- **Dark Mode** — Full light/dark theme support
+- **Export Reports** — Download analysis results as formatted text files
+
+## Tech Stack
+
+**Frontend**
+- React 18 + TypeScript
+- Vite
+- Tailwind CSS + Radix UI
+- TanStack Query
+- Supabase Auth
+
+**Backend**
+- Node.js + Express + TypeScript
+- Multer (file uploads)
+- pdf-parse + mammoth (document parsing)
+- AI inference via external API
+- Supabase (PostgreSQL database)
 
 ## Project Structure
 
 ```
-CareerBoostConnect/
+HireIndex/
 ├── frontend/          # React + Vite frontend
-├── backend/           # Express.js backend
-├── package.json       # Root package.json for managing both
+│   ├── src/
+│   │   ├── pages/     # Home, ResumeAnalyzer, History, Login, About
+│   │   ├── components/
+│   │   └── lib/       # Supabase client, query client, types
+├── backend/
+│   ├── server/        # Express routes, AI integration, storage
+│   └── shared/        # Shared schema types
 └── README.md
 ```
 
-## Prerequisites
+## Local Setup
 
-- Node.js (v18 or higher)
-- npm or yarn
+### Prerequisites
+- Node.js v18+
+- A Supabase project
+- An AI API key
 
-## Setup Instructions
-
-### 1. Install Dependencies
-
-Run this command from the root directory to install all dependencies for both frontend and backend:
+### 1. Clone the repo
 
 ```bash
-npm run install:all
+git clone https://github.com/your-username/hireindex.git
+cd hireindex
 ```
 
-Or install them separately:
+### 2. Backend setup
 
-```bash
-# Install root dependencies
-npm install
-
-# Install frontend dependencies
-cd frontend && npm install
-
-# Install backend dependencies
-cd backend && npm install
-```
-
-### 2. Environment Setup
-
-#### Backend Environment Variables
-
-Create a `.env` file in the `backend/` directory:
-
-```env
-GEMINI_API_KEY=your_gemini_api_key_here
-NODE_ENV=development
-PORT=5000
-```
-
-#### Frontend Environment Variables (Optional)
-
-Create a `.env` file in the `frontend/` directory if you need to override the API URL:
-
-```env
-VITE_API_URL=http://localhost:5000
-```
-
-### 3. Running the Application
-
-#### Option 1: Run Both Frontend and Backend Together
-
-From the root directory:
-
-```bash
-npm run dev
-```
-
-This will start:
-- Frontend on http://localhost:5173
-- Backend on http://localhost:5000
-
-#### Option 2: Run Frontend and Backend Separately
-
-**Terminal 1 - Backend:**
 ```bash
 cd backend
-npm run dev
+npm install
 ```
 
-**Terminal 2 - Frontend:**
+Create `backend/.env`:
+
+```env
+AI_API_KEY=your_api_key_here
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+PORT=5001
+```
+
+### 3. Frontend setup
+
 ```bash
 cd frontend
-npm run dev
+npm install
 ```
 
-### 4. Build for Production
+Create `frontend/.env`:
+
+```env
+VITE_API_URL=http://localhost:5001
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key
+```
+
+### 4. Database setup
+
+Run this in your Supabase SQL Editor:
+
+```sql
+CREATE TABLE resume_analysis (
+  id bigserial PRIMARY KEY,
+  filename text NOT NULL,
+  file_type text NOT NULL,
+  overall_score integer NOT NULL,
+  keywords_score integer NOT NULL,
+  experience_score integer NOT NULL,
+  skills_score integer NOT NULL,
+  education_score integer NOT NULL,
+  formatting_score integer NOT NULL,
+  feedback jsonb NOT NULL,
+  improvement_suggestions jsonb NOT NULL,
+  user_id uuid REFERENCES auth.users(id),
+  created_at timestamptz DEFAULT now() NOT NULL
+);
+
+ALTER TABLE resume_analysis ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Users see own analyses" ON resume_analysis
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Allow inserts" ON resume_analysis
+  FOR INSERT WITH CHECK (true);
+```
+
+### 5. Run locally
 
 ```bash
-# Build both frontend and backend
-npm run build
+# Terminal 1
+cd backend && npm run dev
 
-# Or build separately
-npm run build:frontend
-npm run build:backend
+# Terminal 2
+cd frontend && npm run dev
 ```
 
-## Features
-
-- **Resume Upload**: Support for PDF and Word documents
-- **ATS Analysis**: AI-powered analysis using Google Gemini
-- **Score Breakdown**: Detailed scoring across multiple categories
-- **Improvement Suggestions**: Actionable feedback for resume improvement
-- **Export Reports**: Download analysis reports as text files
-- **Dark Mode**: Toggle between light and dark themes
-
-## API Endpoints
-
-- `POST /api/resume/analyze` - Analyze uploaded resume
-- `GET /api/health` - Health check endpoint
-
-## Development
-
-### Frontend
-- React 18 with TypeScript
-- Vite for build tooling
-- Tailwind CSS for styling
-- Radix UI components
-- React Query for data fetching
-
-### Backend
-- Express.js with TypeScript
-- Multer for file uploads
-- PDF parsing with pdf-parse
-- Word document parsing with mammoth
-- Google Gemini API for AI analysis
+Frontend: http://localhost:5173  
+Backend: http://localhost:5001
 
 ## Deployment
 
+### Backend (Render)
+- Root Directory: `backend`
+- Build Command: `npm install`
+- Start Command: `npm start`
+- Add all environment variables from `backend/.env`
+
 ### Frontend (Vercel)
-1. Push your code to GitHub
-2. Connect your repository to Vercel
-3. Set the root directory to `frontend`
-4. Set build command: `npm run build`
-5. Set output directory: `dist`
+- Root Directory: `frontend`
+- Framework: Vite
+- Build Command: `npm run build`
+- Output Directory: `dist/public`
+- Add all environment variables from `frontend/.env` (use your Render URL for `VITE_API_URL`)
 
-### Backend (Railway/Render/Heroku)
-1. Set the root directory to `backend`
-2. Set build command: `npm run build`
-3. Set start command: `npm start`
-4. Add environment variables (GEMINI_API_KEY, etc.)
+## API Endpoints
 
-## Troubleshooting
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/resume/analyze` | Upload and analyze a resume |
+| GET | `/api/resume/analyses/recent` | Get recent analyses |
+| GET | `/api/health` | Health check |
 
-### Common Issues
+## Research
 
-1. **Port already in use**: Make sure ports 5000 and 5173 are available
-2. **CORS errors**: The backend is configured to allow requests from localhost:5173
-3. **Missing dependencies**: Run `npm run install:all` to install all dependencies
-4. **API key issues**: Make sure your Gemini API key is set in the backend `.env` file
+This project is based on the paper:
 
-### Getting Help
+> **HireIndex: A RAG-Enhanced AI Recruitment Platform for Fair, Transparent, and Efficient Hiring**  
+> Abhishek Tiwari, Adit Katiyar, Sneha Dhanuka, Dr. Neeraj Kumar Verma  
+> Manipal University Jaipur  
+> *2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE*  
+> DOI: 10.1109/ICETCE66848.2025.11387932
 
-If you encounter any issues:
-1. Check the console for error messages
-2. Ensure all dependencies are installed
-3. Verify environment variables are set correctly
-4. Make sure both frontend and backend are running
+## Authors
+
+- **Abhishek Tiwari** — AI/MLOps/Web Development — [LinkedIn](https://www.linkedin.com/in/abhishek-tiwari-03ax/)
+- **Adit Katiyar** — ML/Web Development — [LinkedIn](https://www.linkedin.com/in/adit-katiyar-0863692b9/)
+- **Sneha Dhanuka** — UI/UX & Frontend — [LinkedIn](https://www.linkedin.com/in/sneha-dhanuka/)
 
 ## License
 
-MIT License 
+MIT License
