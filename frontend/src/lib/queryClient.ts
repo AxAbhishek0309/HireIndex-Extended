@@ -1,7 +1,8 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { supabase } from "./supabase";
 
 // API base URL - change this for production
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001';
 
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
@@ -16,23 +17,30 @@ export async function apiRequest(
   data?: unknown | undefined,
   formData?: FormData | undefined,
 ): Promise<Response> {
-  // Use different request options based on whether we're sending FormData or JSON
   const options: RequestInit = {
     method,
     credentials: "include",
   };
-  
+
+  // Attach Supabase auth token if available
+  const { data: { session } } = await supabase.auth.getSession();
+  const headers: Record<string, string> = {};
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
+  }
+
   if (formData) {
-    // FormData should not set Content-Type as the browser will set it with the boundary
+    options.headers = headers;
     options.body = formData;
   } else if (data) {
-    options.headers = { "Content-Type": "application/json" };
+    headers['Content-Type'] = 'application/json';
+    options.headers = headers;
     options.body = JSON.stringify(data);
+  } else {
+    options.headers = headers;
   }
-  
-  // Prepend API base URL if the URL starts with /api
+
   const fullUrl = url.startsWith('/api') ? `${API_BASE_URL}${url}` : url;
-  
   const res = await fetch(fullUrl, options);
   await throwIfResNotOk(res);
   return res;

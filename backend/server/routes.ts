@@ -1,10 +1,9 @@
 import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
-import { storage } from "./storage.js";
+import { storage, type InsertResumeAnalysis } from "./storage.js";
 import multer from "multer";
 import { extractTextFromDocument, isValidFileType } from "./document-parser.js";
-import { isResumeDocument } from "./gemini.js";
-import { analyzeResumeWithGemini } from "./gemini.js";
+import { isResumeDocument, analyzeResume } from "./ai.js";
 import crypto from "crypto";
 
 // Configure multer for file uploads (store in memory)
@@ -60,7 +59,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json(resumeCache[hash]);
       }
 
-      // Check if the document is a resume using Gemini
+      // Check if the document is a resume
       const isResume = await isResumeDocument(text);
       if (!isResume) {
         const notResumeResult = {
@@ -89,14 +88,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(200).json(notResumeResult);
       }
       
-      // Analyze the resume using Gemini
-      const analysisResult = await analyzeResumeWithGemini(text);
-      const result = {
-        id: Date.now(),
+      // Analyze the resume using Groq
+      const analysisResult = await analyzeResume(text);
+
+      // Save to Supabase
+      const saved = await storage.createResumeAnalysis({
         filename: file.originalname,
-        fileType: file.mimetype,
-        createdAt: new Date().toISOString(),
-        ...analysisResult
+        file_type: file.mimetype,
+        overall_score: analysisResult.overallScore,
+        keywords_score: analysisResult.keywordsScore,
+        experience_score: analysisResult.experienceScore,
+        skills_score: analysisResult.skillsScore,
+        education_score: analysisResult.educationScore,
+        formatting_score: analysisResult.formattingScore,
+        feedback: analysisResult.feedback,
+        improvement_suggestions: analysisResult.improvementSuggestions,
+        user_id: (req as any).userId || null,
+      });
+
+      const result = {
+        id: saved.id,
+        filename: saved.filename,
+        fileType: saved.file_type,
+        createdAt: saved.created_at,
+        overallScore: saved.overall_score,
+        keywordsScore: saved.keywords_score,
+        experienceScore: saved.experience_score,
+        skillsScore: saved.skills_score,
+        educationScore: saved.education_score,
+        formattingScore: saved.formatting_score,
+        feedback: saved.feedback,
+        improvementSuggestions: saved.improvement_suggestions,
       };
       resumeCache[hash] = result;
       return res.status(200).json(result);
@@ -171,7 +193,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       try {
         const analyses = await storage.getRecentResumeAnalyses(limit);
-        return res.status(200).json(analyses);
+        return res.status(200).json(analyses.map(a => ({
+          id: a.id,
+          filename: a.filename,
+          fileType: a.file_type,
+          createdAt: a.created_at,
+          overallScore: a.overall_score,
+          keywordsScore: a.keywords_score,
+          experienceScore: a.experience_score,
+          skillsScore: a.skills_score,
+          educationScore: a.education_score,
+          formattingScore: a.formatting_score,
+          feedback: a.feedback,
+          improvementSuggestions: a.improvement_suggestions,
+        })));
       } catch (dbError) {
         console.error("Database error:", dbError);
         

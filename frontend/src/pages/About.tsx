@@ -49,6 +49,14 @@ const About: React.FC = () => {
       linkedin: "https://www.linkedin.com/in/adit-katiyar-0863692b9/",
       github: "https://github.com/Adi101-coder",
       twitter: "https://x.com/adit_katiyar"
+    },
+    {
+      id: 3,
+      name: "Sneha Dhanuka",
+      role: "UI/UX & Frontend",
+      bio: "Creative designer and frontend developer passionate about building intuitive user experiences making complex tools simple.",
+      imageUrl: "/assets/sneha.png",
+      linkedin: "https://www.linkedin.com/in/sneha-dhanuka/",
     }
   ];
 

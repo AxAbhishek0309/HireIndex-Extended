@@ -26,6 +26,21 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
+// Extract user_id from Supabase JWT if present
+app.use((req: any, _res, next) => {
+  const auth = req.headers['authorization'];
+  if (auth?.startsWith('Bearer ')) {
+    try {
+      const token = auth.split(' ')[1];
+      const payload = JSON.parse(Buffer.from(token.split('.')[1], 'base64').toString());
+      req.userId = payload.sub || null;
+    } catch {
+      req.userId = null;
+    }
+  }
+  next();
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
@@ -72,13 +87,8 @@ app.use((req, res, next) => {
     res.json({ status: 'ok', timestamp: new Date().toISOString() });
   });
 
-  // ALWAYS serve the API on port 5000
-  const port = process.env.PORT || 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  const port = process.env.PORT || 5001;
+  server.listen(port, () => {
     console.log(`API server running on port ${port}`);
   });
 })();

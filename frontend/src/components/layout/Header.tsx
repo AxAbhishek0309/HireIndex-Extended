@@ -3,14 +3,16 @@ import { Link, useLocation } from 'wouter';
 import { Button } from '@/components/ui/button';
 import { NavItem } from '@/lib/types';
 import { MessageCircle, Moon, Sun } from 'lucide-react';
+import { useAuth } from '@/lib/AuthContext';
 
 interface HeaderProps {
   onChatToggle: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({ onChatToggle }) => {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [darkMode, setDarkMode] = useState(false);
+  const { user, signOut } = useAuth();
 
   const toggleDarkMode = () => {
     setDarkMode((prev) => {
@@ -28,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({ onChatToggle }) => {
     { name: 'Home', href: '/', active: location === '/' },
     { name: 'Resume Tools', href: '/resume-analyzer', active: location === '/resume-analyzer' },
     { name: 'Resources', href: '/resources', active: location === '/resources' },
+    { name: 'History', href: '/history', active: location === '/history' },
     { name: 'About', href: '/about', active: location === '/about' },
   ];
 
@@ -66,12 +69,23 @@ export const Header: React.FC<HeaderProps> = ({ onChatToggle }) => {
               <MessageCircle className="h-4 w-4 mr-2" />
               <span className="hidden md:inline">Chat Support</span>
             </Button>
-            <Button 
-              variant="outline"
-              className="border-blue-500 text-blue-500 bg-white hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:bg-gray-900 dark:hover:bg-gray-800"
-            >
-              Log In
-            </Button>
+            {user ? (
+              <Button
+                variant="outline"
+                onClick={async () => { await signOut(); navigate('/login'); }}
+                className="border-blue-500 text-blue-500 bg-white hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:bg-gray-900 dark:hover:bg-gray-800"
+              >
+                Sign Out
+              </Button>
+            ) : (
+              <Button
+                variant="outline"
+                onClick={() => navigate('/login')}
+                className="border-blue-500 text-blue-500 bg-white hover:bg-blue-50 dark:border-blue-400 dark:text-blue-400 dark:bg-gray-900 dark:hover:bg-gray-800"
+              >
+                Log In
+              </Button>
+            )}
             <Button
               variant="outline"
               onClick={toggleDarkMode}
