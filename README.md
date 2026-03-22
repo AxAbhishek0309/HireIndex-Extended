@@ -2,16 +2,21 @@
 
 HireIndex is an AI-powered recruitment platform that automates resume screening with a focus on fairness, transparency, and efficiency. It provides ATS compatibility scoring, detailed feedback, and improvement suggestions to help job seekers optimize their resumes.
 
-Published at the **2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE**.
+Published at the **2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE**.  
+DOI: [10.1109/ICETCE66848.2025.11387932](https://doi.org/10.1109/ICETCE66848.2025.11387932)
+
+---
 
 ## Features
 
 - **ATS Resume Scoring** — Analyzes resumes across keywords, experience, skills, education, and formatting
-- **AI-Powered Feedback** — Detailed section-by-section feedback with actionable improvement suggestions
+- **NLP-Based Feedback** — Section-by-section feedback with actionable improvement suggestions
 - **Analysis History** — Authenticated users can view and download past analysis reports
 - **User Authentication** — Email-based sign up/sign in with per-user data isolation
 - **Dark Mode** — Full light/dark theme support
 - **Export Reports** — Download analysis results as formatted text files
+
+---
 
 ## Tech Stack
 
@@ -26,30 +31,33 @@ Published at the **2025 8th International Conference on Emerging Technologies in
 - Node.js + Express + TypeScript
 - Multer (file uploads)
 - pdf-parse + mammoth (document parsing)
-- AI inference via external API
+- NLP-based resume analysis engine
 - Supabase (PostgreSQL database)
+
+---
 
 ## Project Structure
 
 ```
 HireIndex/
-├── frontend/          # React + Vite frontend
+├── frontend/
 │   ├── src/
-│   │   ├── pages/     # Home, ResumeAnalyzer, History, Login, About
+│   │   ├── pages/        # Home, ResumeAnalyzer, History, Login, About
 │   │   ├── components/
-│   │   └── lib/       # Supabase client, query client, types
+│   │   └── lib/          # Supabase client, query client, types
 ├── backend/
-│   ├── server/        # Express routes, AI integration, storage
-│   └── shared/        # Shared schema types
+│   ├── server/           # Express routes, analysis engine, storage
+│   └── shared/           # Shared schema types
 └── README.md
 ```
+
+---
 
 ## Local Setup
 
 ### Prerequisites
 - Node.js v18+
 - A Supabase project
-- An AI API key
 
 ### 1. Clone the repo
 
@@ -68,7 +76,6 @@ npm install
 Create `backend/.env`:
 
 ```env
-AI_API_KEY=your_api_key_here
 SUPABASE_URL=https://your-project.supabase.co
 SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
@@ -133,6 +140,8 @@ cd frontend && npm run dev
 Frontend: http://localhost:5173  
 Backend: http://localhost:5001
 
+---
+
 ## Deployment
 
 ### Backend (Render)
@@ -146,7 +155,9 @@ Backend: http://localhost:5001
 - Framework: Vite
 - Build Command: `npm run build`
 - Output Directory: `dist/public`
-- Add all environment variables from `frontend/.env` (use your Render URL for `VITE_API_URL`)
+- Add all environment variables from `frontend/.env`
+
+---
 
 ## API Endpoints
 
@@ -156,21 +167,24 @@ Backend: http://localhost:5001
 | GET | `/api/resume/analyses/recent` | Get recent analyses |
 | GET | `/api/health` | Health check |
 
-## Research
+---
 
-This project is based on the paper:
+## Research
 
 > **HireIndex: A RAG-Enhanced AI Recruitment Platform for Fair, Transparent, and Efficient Hiring**  
 > Abhishek Tiwari, Adit Katiyar, Sneha Dhanuka, Dr. Neeraj Kumar Verma  
 > Manipal University Jaipur  
-> *2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE*  
-> DOI: 10.1109/ICETCE66848.2025.11387932
+> *2025 8th International Conference on Emerging Technologies in Computer Engineering (ICETCE), IEEE*
+
+---
 
 ## Authors
 
 - **Abhishek Tiwari** — AI/MLOps/Web Development — [LinkedIn](https://www.linkedin.com/in/abhishek-tiwari-03ax/)
 - **Adit Katiyar** — ML/Web Development — [LinkedIn](https://www.linkedin.com/in/adit-katiyar-0863692b9/)
 - **Sneha Dhanuka** — UI/UX & Frontend — [LinkedIn](https://www.linkedin.com/in/sneha-dhanuka/)
+
+---
 
 ## License
 
